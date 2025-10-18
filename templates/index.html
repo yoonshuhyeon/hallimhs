@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한림고등학교</title>
+    <link rel="stylesheet" href="/static/style.css?v=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="site-wrap">
+        <header class="site-header">
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    <img src="/static/images/logo.png" alt="학교 로고">
+                    <h1>한림고등학교</h1>
+                </a>
+                <div class="user-menu">
+                     <div id="guest-view" style="display: none;">
+                        <a href="/login" class="header-login-btn">로그인</a>
+                    </div>
+                    <div id="user-view" style="display: none;">
+                        <span id="user-name"></span>
+                        <a href="/qr">내 QR코드</a>
+                        <a href="#" id="logout-link">로그아웃</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="site-main">
+            <section class="main-content">
+                <div class="content-header">
+                    <h2>오늘의 식단</h2>
+                    <div class="date-selector">
+                        <button id="prev-day"><i class="fas fa-chevron-left"></i></button>
+                        <input type="date" id="current-date">
+                        <button id="next-day"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="meal-grid">
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <h3><i class="fas fa-sun"></i> 중식</h3>
+                            <div class="like-section">
+                                <button class="like-button" data-meal-type="lunch"><i class="far fa-thumbs-up"></i></button>
+                                <span class="like-count" id="lunch-like-count">0</span>
+                            </div>
+                        </div>
+                        <p id="lunch-menu" class="meal-menu">로딩 중...</p>
+                    </div>
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <h3><i class="fas fa-moon"></i> 석식</h3>
+                            <div class="like-section">
+                                <button class="like-button" data-meal-type="dinner"><i class="far fa-thumbs-up"></i></button>
+                                <span class="like-count" id="dinner-like-count">0</span>
+                            </div>
+                        </div>
+                        <p id="dinner-menu" class="meal-menu">로딩 중...</p>
+                    </div>
+                    <div class="meal-card nutrition-card">
+                        <h3><i class="fas fa-info-circle"></i> 영양 정보</h3>
+                        <div id="nutrition-info">
+                            <p><strong>칼로리:</strong> <span id="cal-info">로딩 중...</span></p>
+                            <p><strong>알레르기:</strong> <span id="allergy-info">로딩 중...</span></p>
+                            <div class="collapsible-content">
+                                <p><strong>원산지:</strong> <span id="orplc-info">로딩 중...</span></p>
+                                <p><strong>영양소:</strong> <span id="ntr-info">로딩 중...</span></p>
+                            </div>
+                            <button class="view-more-btn">더보기</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-header" style="margin-top: 3rem;">
+                    <h2>주간 수업 시간표</h2>
+                    <div class="week-selector">
+                        <button id="prev-week"><i class="fas fa-chevron-left"></i></button>
+                        <span id="current-week-range"></span>
+                        <button id="next-week"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="class-schedule-container">
+                    <table id="weekly-schedule-table">
+                        <thead>
+                            <tr id="schedule-table-header">
+                                <th>교시</th>
+                                <th>월</th>
+                                <th>화</th>
+                                <th>수</th>
+                                <th>목</th>
+                                <th>금</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-table-body">
+                            <!-- Schedule rows will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                    <p id="schedule-message" style="text-align: center; margin-top: 1rem;"></p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <div class="footer-links">
+                    <a href="#">개인정보처리방침</a>
+                    <a href="#">저작권지침</a>
+                </div>
+                <div class="footer-info">
+                    <p>(12345) 제주특별자치도 제주시 예시로 123</p>
+                    <p>Tel: 010-1234-5678 | E-Mail: contact@example.com</p>
+                </div>
+                <p class="copyright">Copyright(c) 2024 Project Name. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

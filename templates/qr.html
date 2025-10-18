@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 QR 코드 - 한림고등학교</title>
+    <link rel="stylesheet" href="/static/style.css?v=1.0">
+</head>
+<body>
+    <div class="site-wrap">
+        <header class="site-header">
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    <img src="/static/images/logo.png" alt="학교 로고">
+                    <h1>한림고등학교 급식</h1>
+                </a>
+                <nav class="main-nav">
+                    <a href="/">오늘의 식단</a>
+                    <a href="/nutrition">영양 정보</a>
+                    <a href="/feedback">식단 피드백</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="site-main">
+            <section class="main-content">
+                <div class="content-header">
+                    <h2>내 QR 코드</h2>
+                </div>
+                <div class="meal-card" style="text-align: center;">
+                    <div id="qr-code"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <div class="footer-links">
+                    <a href="#">개인정보처리방침</a>
+                    <a href="#">저작권지침</a>
+                </div>
+                <div class="footer-info">
+                    <p>(12345) 제주특별자치도 제주시 예시로 123</p>
+                    <p>Tel: 010-1234-5678 | E-Mail: contact@example.com</p>
+                </div>
+                <p class="copyright">Copyright(c) 2024 Project Name. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script src="/static/qr.js"></script>
+</body>
+</html>

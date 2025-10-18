@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>식단 피드백 - 한림고등학교</title>
+    <link rel="stylesheet" href="/static/style.css?v=1.0">
+</head>
+<body>
+    <div class="site-wrap">
+        <header class="site-header">
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    <img src="/static/images/logo.png" alt="학교 로고">
+                    <h1>한림고등학교</h1>
+                </a>
+                <nav class="main-nav">
+                    <a href="/">오늘의 식단</a>
+                    <a href="/nutrition">영양 정보</a>
+                    <a href="/feedback">식단 피드백</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="site-main">
+            <section class="main-content">
+                <div class="content-header">
+                    <h2>식단 피드백</h2>
+                </div>
+                <div class="meal-card">
+                    <div class="date-selector">
+                        <input type="date" id="feedback-date">
+                        <select id="meal-type">
+                            <option value="lunch">중식</option>
+                            <option value="dinner">석식</option>
+                        </select>
+                    </div>
+                    <div id="feedback-meal-info">
+                        <p id="feedback-menu">메뉴 정보</p>
+                        <button id="like-button">좋아요</button>
+                        <span id="like-count">0</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <div class="footer-links">
+                    <a href="#">개인정보처리방침</a>
+                    <a href="#">저작권지침</a>
+                </div>
+                <div class="footer-info">
+                    <p>(12345) 제주특별자치도 제주시 예시로 123</p>
+                    <p>Tel: 010-1234-5678 | E-Mail: contact@example.com</p>
+                </div>
+                <p class="copyright">Copyright(c) 2024 Project Name. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/static/feedback.js"></script>
+</body>
+</html>

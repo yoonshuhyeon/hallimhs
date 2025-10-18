@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - 한림고등학교</title>
+    <link rel="stylesheet" href="/static/style.css?v=1.0">
+</head>
+<body>
+    <div class="site-wrap">
+        <header class="site-header">
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    <img src="/static/images/logo.png" alt="학교 로고">
+                    <h1>한림고등학교</h1>
+                </a>
+                <div class="user-menu">
+                     <div id="guest-view" style="display: none;">
+                        <a href="/login" class="header-login-btn">로그인</a>
+                    </div>
+                    <div id="user-view" style="display: none;">
+                        <span id="user-name"></span>
+                        <a href="/qr">내 QR코드</a>
+                        <a href="#" id="logout-link">로그아웃</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="site-main">
+            <div class="form-container">
+                <h1>로그인</h1>
+                <form id="login-form">
+                    <input type="text" id="email" placeholder="아이디" required>
+                    <input type="password" id="password" placeholder="비밀번호" required>
+                    <button type="submit">로그인</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">계정이 없으신가요? <a href="/signup">회원가입</a></p>
+            </div>
+        </main>
+
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <div class="footer-links">
+                    <a href="#">개인정보처리방침</a>
+                    <a href="#">저작권지침</a>
+                </div>
+                <div class="footer-info">
+                    <p>(12345) 제주특별자치도 제주시 예시로 123</p>
+                    <p>Tel: 010-1234-5678 | E-Mail: contact@example.com</p>
+                </div>
+                <p class="copyright">Copyright(c) 2024 Project Name. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script src="/static/login.js"></script>
+</body>
+</html>

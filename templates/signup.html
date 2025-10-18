@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - 한림고등학교 급식</title>
+    <link rel="stylesheet" href="/static/style.css?v=1.0">
+</head>
+<body>
+    <div class="site-wrap">
+        <header class="site-header">
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    <img src="/static/images/logo.png" alt="학교 로고">
+                    <h1>한림고등학교 급식</h1>
+                </a>
+            </div>
+        </header>
+
+        <main class="site-main">
+            <div class="form-container">
+                <h1>회원가입</h1>
+                <form id="signup-form">
+                    <input type="text" id="email" placeholder="아이디" required>
+                    <input type="password" id="password" placeholder="비밀번호" required>
+                    <input type="text" id="name" placeholder="이름" required>
+                    <input type="number" id="grade" placeholder="학년" required>
+                    <input type="number" id="class_number" placeholder="반" required>
+                    <input type="number" id="student_number" placeholder="번호" required>
+                    <button type="submit">회원가입</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">이미 계정이 있으신가요? <a href="/login">로그인</a></p>
+            </div>
+        </main>
+
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <div class="footer-links">
+                    <a href="#">개인정보처리방침</a>
+                    <a href="#">저작권지침</a>
+                </div>
+                <div class="footer-info">
+                    <p>(12345) 제주특별자치도 제주시 예시로 123</p>
+                    <p>Tel: 010-1234-5678 | E-Mail: contact@example.com</p>
+                </div>
+                <p class="copyright">Copyright(c) 2024 Project Name. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/static/signup.js"></script>
+</body>
+</html>

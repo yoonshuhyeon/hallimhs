@@ -1,0 +1,390 @@
+import os
+import re
+import requests
+import jwt
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+from flask import Flask, request, jsonify, render_template
+from datetime import datetime, timedelta
+from functools import wraps
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import text
+
+app = Flask(__name__)
+CORS(app)
+
+# =================================
+# CONFIGURATION
+# =================================
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-secret-key-for-dev')
+uri = os.environ.get('DATABASE_URL')
+if uri and uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# =================================
+# DATABASE MODELS
+# =================================
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=False)
+    name = db.Column(db.String(80), nullable=False)
+    grade = db.Column(db.Integer, nullable=False)
+    class_number = db.Column(db.Integer, nullable=False)
+    student_number = db.Column(db.Integer, nullable=False)
+    last_class_update = db.Column(db.DateTime, nullable=True)
+
+class MealLike(db.Model):
+    __tablename__ = 'meal_likes'
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(10), nullable=False)
+    meal_type = db.Column(db.String(10), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    __table_args__ = (db.UniqueConstraint('date', 'meal_type', 'user_id', name='_date_meal_user_uc'),)
+
+class MealFeedback(db.Model):
+    __tablename__ = 'meal_feedback'
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(10), nullable=False)
+    meal_type = db.Column(db.String(10), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    feedback = db.Column(db.Text, nullable=True)
+    __table_args__ = (db.UniqueConstraint('date', 'meal_type', name='_date_meal_uc'),)
+
+# =================================
+# AUTHENTICATION DECORATORS
+# =================================
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            try:
+                token = request.headers['Authorization'].split(" ")[1]
+            except IndexError:
+                return jsonify({'message': 'Token is missing or invalid!'}), 401
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            current_user = User.query.get(data['user_id'])
+        except Exception:
+            return jsonify({'message': 'Token is invalid!'}), 401
+        return f(current_user, *args, **kwargs)
+    return decorated
+
+def token_optional(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        current_user = None
+        if 'Authorization' in request.headers:
+            try:
+                token = request.headers['Authorization'].split(" ")[1]
+                data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+                current_user = User.query.get(data['user_id'])
+            except Exception:
+                pass
+        return f(current_user, *args, **kwargs)
+    return decorated
+
+# =================================
+# API ROUTES
+# =================================
+@app.route('/api/user')
+@token_optional
+def get_user(current_user):
+    if current_user:
+        return jsonify({'logged_in': True, 'name': current_user.name})
+    return jsonify({'logged_in': False})
+
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    if not data or not all(k in data for k in ['email', 'password', 'name', 'grade', 'class_number', 'student_number']):
+        return jsonify({'error': '모든 필드를 입력해주세요.'}), 400
+    if User.query.filter_by(email=data['email']).first():
+        return jsonify({'error': '이미 사용중인 아이디입니다.'}), 409
+    hashed_password = generate_password_hash(data['password'])
+    new_user = User(email=data['email'], password=hashed_password, name=data['name'], grade=data['grade'], class_number=data['class_number'], student_number=data['student_number'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message': '회원가입에 성공했습니다.'}), 201
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    if not data or not data.get('email') or not data.get('password'):
+        return jsonify({'error': '아이디과 비밀번호를 입력해주세요.'}), 400
+    user = User.query.filter_by(email=data['email']).first()
+    if not user or not check_password_hash(user.password, data['password']):
+        return jsonify({'error': '아이디 혹은 비밀번호가 틀렸습니다.'}), 401
+
+    needs_update = False
+    today = datetime.utcnow()
+    march_first_this_year = datetime(today.year, 3, 1)
+
+    if user.last_class_update is None:
+        needs_update = True
+    elif user.last_class_update < march_first_this_year:
+        needs_update = True
+
+    token = jwt.encode({'user_id': user.id, 'exp': datetime.utcnow() + timedelta(days=30)}, app.config['SECRET_KEY'], algorithm="HS256")
+    return jsonify({
+        'message': '로그인 성공',
+        'token': token,
+        'user_name': user.name,
+        'needs_class_info': needs_update
+    }), 200
+
+@app.route('/api/update-class', methods=['POST'])
+@token_required
+def update_class(current_user):
+    data = request.get_json()
+    if not data or not all(k in data for k in ['grade', 'class_number', 'student_number']):
+        return jsonify({'error': '모든 필드를 입력해주세요.'}), 400
+
+    current_user.grade = data['grade']
+    current_user.class_number = data['class_number']
+    current_user.student_number = data['student_number']
+    current_user.last_class_update = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'message': '반 정보가 성공적으로 업데이트되었습니다.'}), 200
+
+@app.route('/api/generate_qr', methods=['GET'])
+@token_required
+def generate_qr(current_user):
+    filename = f"{current_user.grade}_{current_user.class_number}_{current_user.student_number}.png"
+    qr_url = f"/desktop_apps/qrcodes/{filename}"
+    return jsonify({"qr_code_url": qr_url})
+
+NEIS_API_BASE_URL = "https://open.neis.go.kr/hub/"
+MEAL_API_URL = NEIS_API_BASE_URL + "mealServiceDietInfo"
+HIS_TIMETABLE_URL = NEIS_API_BASE_URL + "hisTimetable" # New URL for timetable
+NEIS_API_KEY = os.environ.get("MEAL_API_KEY") # Reusing the same key
+ATPT_OFCDC_SC_CODE = "T10"
+SD_SCHUL_CODE = "9290055"
+
+@app.route('/api/meal', methods=['GET'])
+def get_meal():
+    date_str = request.args.get('date', datetime.today().strftime("%Y%m%d"))
+    params = {'KEY': NEIS_API_KEY, 'Type': 'json', 'ATPT_OFCDC_SC_CODE': ATPT_OFCDC_SC_CODE, 'SD_SCHUL_CODE': SD_SCHUL_CODE, 'MLSV_YMD': date_str}
+    try:
+        response = requests.get(MEAL_API_URL, params=params)
+        response.raise_for_status()
+        data = response.json()
+        meal_info = {'lunch': '정보 없음', 'dinner': '정보 없음'}
+        service = data.get('mealServiceDietInfo')
+        if service and len(service) > 1:
+            rows = service[1].get('row', [])
+            for meal in rows:
+                if meal.get('MMEAL_SC_NM') == '중식':
+                    meal_info['lunch'] = meal.get('DDISH_NM', '정보 없음').replace('<br/>', '\n')
+                elif meal.get('MMEAL_SC_NM') == '석식':
+                    meal_info['dinner'] = meal.get('DDISH_NM', '정보 없음').replace('<br/>', '\n')
+        else:
+            meal_info['error'] = "급식 정보가 없습니다."
+        return jsonify(meal_info)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/nutrition', methods=['GET'])
+def get_nutrition():
+    date_str = request.args.get('date', datetime.today().strftime("%Y%m%d"))
+    params = {
+        'KEY': NEIS_API_KEY, 'Type': 'json',
+        'ATPT_OFCDC_SC_CODE': ATPT_OFCDC_SC_CODE,
+        'SD_SCHUL_CODE': SD_SCHUL_CODE, 'MLSV_YMD': date_str
+    }
+    try:
+        response = requests.get(MEAL_API_URL, params=params)
+        response.raise_for_status()
+        data = response.json()
+        service = data.get('mealServiceDietInfo')
+        if not service or len(service) < 2:
+            return jsonify({"error": "급식 정보가 없습니다."} ), 404
+        
+        rows = service[1].get('row', [])
+        orplc_info = set()
+        cal_info = set()
+        ntr_info = set()
+        allergy_codes = set()
+
+        for row in rows:
+            if (v := row.get('ORPLC_INFO')): orplc_info.add(v)
+            if (v := row.get('CAL_INFO')): cal_info.add(v)
+            if (v := row.get('NTR_INFO')): ntr_info.add(v)
+            if (dish_name := row.get('DDISH_NM')):
+                found_codes = re.findall(r'\((\d+(?:\.\d+)*)\)', dish_name)
+                for code_group in found_codes:
+                    allergy_codes.update(c.strip() for c in code_group.split('.'))
+
+        return jsonify({
+            "ORPLC_INFO": ', '.join(sorted(orplc_info)) or '정보 없음',
+            "CAL_INFO": ', '.join(sorted(cal_info)) or '정보 없음',
+            "NTR_INFO": ', '.join(sorted(ntr_info)) or '정보 없음',
+            "allergy": ','.join(sorted(list(allergy_codes))) or '정보 없음'
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/submit_like', methods=['POST'])
+@token_required
+def submit_like(current_user):
+    data = request.get_json()
+    date = data.get('date', datetime.today().strftime("%Y%m%d"))
+    meal_type = data.get('meal_type')
+    if not meal_type:
+        return jsonify({"error": "meal_type is required"}), 400
+    existing_like = MealLike.query.filter_by(date=date, meal_type=meal_type, user_id=current_user.id).first()
+    try:
+        if existing_like:
+            db.session.delete(existing_like)
+            db.session.commit()
+            return jsonify({"message": "좋아요를 취소했습니다."} ), 200
+        else:
+            new_like = MealLike(date=date, meal_type=meal_type, user_id=current_user.id)
+            db.session.add(new_like)
+            db.session.commit()
+            return jsonify({"message": "좋아요를 눌렀습니다."} ), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/get_like_count', methods=['GET'])
+@token_optional
+def get_like_count(current_user):
+    date = request.args.get('date', datetime.today().strftime("%Y%m%d"))
+    meal_type = request.args.get('meal_type')
+    if not meal_type:
+        return jsonify({"error": "meal_type is required"}), 400
+    count = MealLike.query.filter_by(date=date, meal_type=meal_type).count()
+    user_has_liked = False
+    if current_user:
+        like = MealLike.query.filter_by(date=date, meal_type=meal_type, user_id=current_user.id).first()
+        if like:
+            user_has_liked = True
+    return jsonify({"like_count": count, "user_has_liked": user_has_liked}), 200
+
+@app.route('/api/schedule', methods=['GET'])
+@token_required
+def get_schedule(current_user):
+    start_date_str = request.args.get('start_date', datetime.today().strftime("%Y%m%d"))
+    
+    if not current_user.grade or not current_user.class_number:
+        return jsonify({"error": "학년 및 반 정보가 필요합니다."}), 400
+
+    try:
+        start_date = datetime.strptime(start_date_str, "%Y%m%d").date()
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use YYYYMMDD."}), 400
+
+    # Find the Monday of the week for the given start_date
+    # weekday() returns 0 for Monday, 6 for Sunday
+    days_since_monday = start_date.weekday()
+    if days_since_monday > 4: # If it's Saturday or Sunday, go to next Monday
+        start_of_week = start_date + timedelta(days=(7 - days_since_monday))
+    else: # Otherwise, go to the Monday of the current week
+        start_of_week = start_date - timedelta(days=days_since_monday)
+
+    weekly_schedule = {
+        "monday": [], "tuesday": [], "wednesday": [], "thursday": [], "friday": []
+    }
+    day_names = ["monday", "tuesday", "wednesday", "thursday", "friday"]
+
+    for i in range(5): # Loop for 5 weekdays
+        current_day = start_of_week + timedelta(days=i)
+        current_day_str = current_day.strftime("%Y%m%d")
+        
+        params = {
+            'KEY': NEIS_API_KEY,
+            'Type': 'json',
+            'ATPT_OFCDC_SC_CODE': ATPT_OFCDC_SC_CODE,
+            'SD_SCHUL_CODE': SD_SCHUL_CODE,
+            'ALL_TI_YMD': current_day_str,
+            'GRADE': current_user.grade,
+            'CLASS_NM': current_user.class_number
+        }
+
+        try:
+            response = requests.get(HIS_TIMETABLE_URL, params=params)
+            response.raise_for_status()
+            data = response.json()
+
+            day_schedule = {}
+            if 'hisTimetable' in data and len(data['hisTimetable']) > 1 and 'row' in data['hisTimetable'][1]:
+                rows = data['hisTimetable'][1]['row']
+                for period in rows:
+                    period_no = period.get('PERIO', 'N/A')
+                    subject_name = period.get('ITRT_CNTNT', '과목 정보 없음')
+                    day_schedule[period_no] = subject_name
+            
+            # Fill in periods 1-7, assuming a maximum of 7 periods
+            formatted_day_schedule = []
+            for p in range(1, 8): # Assuming periods 1 to 7
+                formatted_day_schedule.append(day_schedule.get(str(p), '')) # Use empty string for no class
+            
+            weekly_schedule[day_names[i]] = formatted_day_schedule
+
+        except requests.exceptions.RequestException as e:
+            # Log the error but continue to fetch for other days
+            print(f"Error fetching schedule for {current_day_str}: {e}")
+            weekly_schedule[day_names[i]] = ["API 오류"] * 7 # Fill with error message
+        except Exception as e:
+            print(f"Error processing schedule for {current_day_str}: {e}")
+            weekly_schedule[day_names[i]] = ["처리 오류"] * 7 # Fill with error message
+
+    return jsonify({"weekly_schedule": weekly_schedule, "start_of_week": start_of_week.strftime("%Y%m%d")}), 200
+
+# =================================
+# FRONTEND ROUTES
+# =================================
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/login')
+def login_page():
+    return render_template('login.html')
+
+@app.route('/signup')
+def signup_page():
+    return render_template('signup.html')
+
+@app.route('/nutrition')
+def nutrition_page():
+    return render_template('nutrition.html')
+
+@app.route('/feedback')
+def feedback_page():
+    return render_template('feedback.html')
+
+@app.route('/qr')
+def qr_page():
+    return render_template('qr.html')
+
+# =================================
+# APP INITIALIZATION
+# =================================
+with app.app_context():
+    db.create_all()
+    try:
+        with db.engine.begin() as connection:
+            inspector = db.inspect(db.engine)
+            if 'last_class_update' not in [col['name'] for col in inspector.get_columns('users')]:
+                connection.execute(text('ALTER TABLE users ADD COLUMN last_class_update TIMESTAMP;'))
+    except Exception as e:
+        print(f"Could not add column: {e}")
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port)

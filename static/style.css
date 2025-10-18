@@ -1,0 +1,506 @@
+/* Google Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+/* General Resets & Variables */
+:root {
+    --primary-color: #4a90e2; /* A more modern, softer blue */
+    --title-color: rgb(255, 106, 0); /* Dedicated variable for title */
+    --primary-color-dark: #357ABD;
+    --text-color: #333;
+    --border-color: #dee2e6;
+    --background-color: #f4f7fa;
+    --card-bg: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.site-wrap {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+}
+
+/* Header */
+.site-header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between; /* Distribute items with space between them */
+    align-items: center; /* Vertically align items in the middle */
+    padding: 1.5rem 2rem; /* Increased padding */
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem; /* Re-adding gap for spacing */
+    text-decoration: none;
+}
+
+.logo img {
+    height: 60px; /* As requested by user */
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--title-color);
+    margin-left: 0.3rem; /* Use margin for spacing as requested */
+}
+
+.main-nav a {
+    margin: 0 1.2rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    position: relative;
+    padding-bottom: 5px;
+    transition: color 0.3s ease;
+}
+
+.main-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.main-nav a:hover {
+    color: var(--primary-color);
+}
+
+.main-nav a:hover::after {
+    width: 100%;
+    left: 0;
+}
+
+.user-menu a {
+    margin-left: 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* Main Content */
+.site-main {
+    padding: 2.5rem;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--text-color);
+    padding-bottom: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.content-header h2 {
+    font-size: 2rem;
+}
+
+.date-selector button {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    color: var(--primary-color); /* Make arrows visible */
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.date-selector button:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.date-selector span {
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin: 0 1.5rem;
+}
+
+/* Style for the new date input */
+#current-date {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin: 0 1.5rem;
+    padding: 0.5rem;
+    border: none;
+    background: transparent;
+    text-align: center;
+    cursor: pointer;
+    color: var(--text-color); /* Explicitly set text color */
+}
+
+#current-date::-webkit-calendar-picker-indicator {
+    display: none; /* Hide the calendar icon in Chrome/Safari */
+    -webkit-appearance: none;
+}
+
+#current-date::-moz-calendar-picker-indicator { /* Not standard but for Firefox */
+    display: none;
+}
+
+#current-date::-ms-clear { /* For IE */
+    display: none;
+}
+
+
+.meal-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem; /* Increased gap */
+}
+
+@media (min-width: 1024px) {
+    .meal-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.meal-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px; /* Softer radius */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden; /* Ensures header bg is contained */
+}
+
+.meal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.meal-card h3 {
+    background-color: #f8f9fa;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+}
+
+.meal-card h3 .fas {
+    margin-right: 0.75rem;
+    color: var(--primary-color);
+}
+
+.meal-card .meal-menu {
+    padding: 1.5rem;
+    white-space: pre-wrap;
+    font-size: 1.05rem;
+    min-height: 180px;
+}
+
+/* Final, Consolidated Styles for Nutrition Info Card */
+.nutrition-card #nutrition-info {
+    padding: 1.5rem;
+    background-color: var(--card-bg);
+}
+
+.nutrition-card #nutrition-info p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #111; /* Very dark color */
+    margin-bottom: 0.8rem;
+}
+
+.nutrition-card #nutrition-info p strong {
+    font-weight: 700;
+    color: #000; /* Black for labels */
+    margin-right: 0.5rem;
+}
+
+.nutrition-card #nutrition-info p span {
+    color: #333; /* Slightly lighter for the value */
+}
+
+/* Styles for 'View More' button and collapsible content */
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+}
+
+.view-more-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 1.5rem 1.5rem 1.5rem; /* Add margin to position it */
+    cursor: pointer;
+    width: calc(100% - 3rem); /* Adjust width for padding */
+    text-align: center;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.view-more-btn:hover {
+    background-color: #f8f9fa;
+}
+
+/* Footer */
+.site-footer {
+    padding: 2.5rem;
+    background-color: #343a40;
+    color: #adb5bd;
+    font-size: 0.9rem;
+}
+
+.footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.footer-links {
+    margin-bottom: 1rem;
+}
+
+.footer-links a {
+    color: #f8f9fa;
+    margin: 0 0.75rem;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.footer-info {
+    margin-bottom: 1rem;
+    color: #6c757d;
+}
+
+.footer-info p {
+    margin: 0.25rem 0;
+}
+
+.copyright {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* Style for Header Login Button */
+.header-login-btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.header-login-btn:hover {
+    background-color: var(--primary-color-dark);
+    color: white;
+    text-decoration: none;
+}
+
+/* Login and Signup Form Styles */
+.form-container {
+    background-color: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    max-width: 450px;
+    margin: 3rem auto;
+    text-align: center;
+}
+
+.form-container h1 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1.8rem;
+    font-weight: 700;
+}
+
+.form-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-container input[type="text"],
+.form-container input[type="password"],
+.form-container input[type="email"],
+.form-container input[type="number"] {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-container input[type="text"]:focus,
+.form-container input[type="password"]:focus,
+.form-container input[type="email"]:focus,
+.form-container input[type="number"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    outline: none;
+}
+
+.form-container button[type="submit"] {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 1rem;
+}
+
+.form-container button[type="submit"]:hover {
+    background-color: var(--primary-color-dark);
+    transform: translateY(-2px);
+}
+
+.form-container p {
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+    color: var(--text-color);
+}
+
+.form-container p a {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.form-container p a:hover {
+    text-decoration: underline;
+}
+
+/* QR Code Page Styles */
+#qr-code {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem; /* Add some padding around the QR code */
+}
+
+#qr-code canvas {
+    display: block; /* Ensure canvas is a block element for margin auto to work */
+    margin: 0 auto; /* Center the canvas horizontally */
+    max-width: 100%; /* Ensure it's responsive */
+    height: auto;
+}
+
+/* Bold styling for user-related elements in header */
+#user-view #user-name {
+    font-weight: bold;
+    margin-right: 10px; /* Add some spacing */
+}
+
+#user-view a {
+    font-weight: bold;
+    margin-left: 10px; /* Add some spacing between links */
+}
+
+/* Weekly Schedule Table Styles */
+.week-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+}
+
+.week-selector button {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.week-selector button:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.week-selector span {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.class-schedule-container {
+    max-width: 100%;
+    overflow-x: auto; /* Enable horizontal scrolling on small screens */
+    margin: 0 auto; /* Center the container */
+}
+
+#weekly-schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    border-radius: 12px;
+    overflow: hidden; /* Ensures rounded corners apply to children */
+}
+
+#weekly-schedule-table th,
+#weekly-schedule-table td {
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+#weekly-schedule-table th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+    position: sticky;
+    top: 0; /* Keep header visible when scrolling */
+    z-index: 1;
+}
+
+#weekly-schedule-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+#weekly-schedule-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+#schedule-message {
+    color: #dc3545; /* Red for error messages */
+    font-weight: bold;
+}
+
+
+
